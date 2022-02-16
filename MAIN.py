@@ -267,37 +267,37 @@ class Game:
         self.all_sprites.update()
         self.camera.update(self.player)
         
-        # mobs hit player
-        hits = pg.sprite.spritecollide(self.player, self.items, False)
-        for hit in hits:
-            if hit.type == 'health' and self.player.health < self.player.totalHealth:
-                hit.kill()
-                self.player.add_health(HEALTH_PACK_AMOUNT) 
-            if hit.type == 'playerRespawn':
-                if self.respawnOpen:
-                    self.player.inDeadBox=True
+        # # mobs hit player
+        # hits = pg.sprite.spritecollide(self.player, self.items, False)
+        # for hit in hits:
+        #     if hit.type == 'health' and self.player.health < self.player.totalHealth:
+        #         hit.kill()
+        #         self.player.add_health(HEALTH_PACK_AMOUNT) 
+        #     if hit.type == 'playerRespawn':
+        #         if self.respawnOpen:
+        #             self.player.inDeadBox=True
 
 
-        hits = pg.sprite.spritecollide(self.player, self.bullets, False, collide_hit_rect)
-        for hit in hits:
-            if self.player.eliminated:
-                self.player.endurancePoints-=10
-                if self.player.endurancePoints<0:
-                    self.player.endurancePoints=0
-            self.player.defensePoints -= hit.shooter.accuracy
-            self.player.actionPoints-=15
-            if self.player.actionPoints <0:
-                    self.player.actionPoints =0
-            if self.player.defensePoints <0:
-                self.player.defensePoints=0
-                # hit.shooter.target=self.mobRespawn
-                MuzzleFlash(self, self.player.pos,"splat")
-                choice(self.splatSounds).play(0)
-            else:
-                pass
-                #self.player.dodge()
-        if hits:
-            hits[0].kill()
+        # hits = pg.sprite.spritecollide(self.player, self.bullets, False, collide_hit_rect)
+        # for hit in hits:
+        #     if self.player.eliminated:
+        #         self.player.endurancePoints-=10
+        #         if self.player.endurancePoints<0:
+        #             self.player.endurancePoints=0
+        #     self.player.defensePoints -= hit.shooter.accuracy
+        #     self.player.actionPoints-=15
+        #     if self.player.actionPoints <0:
+        #             self.player.actionPoints =0
+        #     if self.player.defensePoints <0:
+        #         self.player.defensePoints=0
+        #         # hit.shooter.target=self.mobRespawn
+        #         MuzzleFlash(self, self.player.pos,"splat")
+        #         choice(self.splatSounds).play(0)
+        #     else:
+        #         pass
+        #         #self.player.dodge()
+        # if hits:
+        #     hits[0].kill()
 
         for i in self.mobs:    
             hits = pg.sprite.spritecollide(i, self.items, False)
@@ -373,20 +373,22 @@ class Game:
                     self.player.stowTube=True
 
             if event.type == pygame.VIDEORESIZE:
-                 surface = pygame.display.set_mode((event.w, event.h),
-                                              pygame.RESIZABLE)
+                 surface = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+
+            elif event.type == pygame.MOUSEMOTION:
+                self.player.rotate()
+
+
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     sys.exit()
                     self.mainMenu.gameGo=False
                     print(self.mainMenu.gameGo)
-
                 if event.key==HYDRATE:
                     self.player.getTube=True
                     if self.player.currentHand=="LEFT":
                         self.player.drinkSwitch=True
                         self.player.SwitchHands()
-
                 if event.key == pg.K_m:
                     self.player.changeMode()
                 if event.key == pg.K_LALT:

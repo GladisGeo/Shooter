@@ -7,7 +7,7 @@ from MAP import collide_hit_rect
 from FUNCTIONS import *
 from MUZZLEFLASH import *
 vec = pg.math.Vector2
-
+import math
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -113,13 +113,15 @@ class Player(pg.sprite.Sprite):
         self.endurancePointsTotal=50
         self.endurancePoints=self.endurancePointsTotal
         #Image and position
+        self.vel = vec(0, 0)
+        self.pos = vec(y, x)
         self.image = game.player_img_current
-        self.rect = self.image.get_rect()
-        self.rect.center=(x,y)
+        self.rect = self.image.get_rect(center=self.pos)
+        #self.rect = self.image.get_rect()
+        #self.rect.center=(x,y)
         self.hit_rect = pg.Rect(20, 20, 40,40)
         self.hit_rect.center = self.rect.center
-        self.vel = vec(0, 0)
-        self.pos = vec(x, y)
+        self.angle=0
         self.rot = 0
         self.rotationSpeed=150
         self.inDeadBoxCounter=1
@@ -352,7 +354,7 @@ class Player(pg.sprite.Sprite):
         if keys[TURNRIGHT] :
             self.rot_speed=-self.rotationSpeed
         if keys[MOVEFORWARD] :
-                self.vel = vec(self.speed-self.speedPenalty, 0).rotate(-self.rot)
+                self.vel = vec(self.speed-self.speedPenalty, 0).rotate(-self.angle)
                 self.moving=True
                 self.stepper()
         if keys[MOVEBACK] :
@@ -362,7 +364,6 @@ class Player(pg.sprite.Sprite):
         if keys[FIRE]:
             if self. fireMode == 'full-auto' or self.fireMode=="3 round burst":
                 self.fire()
-        
 
     def fire(self):
         if self.airPercent > 0 and self.actionPoints>0 and self.eliminated != True:
@@ -520,6 +521,7 @@ class Player(pg.sprite.Sprite):
                 self.dodging=False
 
     def update(self):
+        self.rotate()
         self.percenter('air')
         self.percenter('action')
         self.percenter('ammo')
@@ -528,6 +530,7 @@ class Player(pg.sprite.Sprite):
         self.percenter('defense')
         self.percenter('endurance')
         self.incrementStats()
+
         if not self.eliminated:
             self.get_keys()
             self.reload()
@@ -542,15 +545,33 @@ class Player(pg.sprite.Sprite):
             self.respawn()
 
 
-        self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
-        self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        if not self.moving and not self.reloading and not self.getTube and not self.stowTube and not self.drinking:
-            if self.currentHand=="RIGHT":
-                self.game.player_img_current=self.game.goose_right_sprites[0]
-            elif self.currentHand=="LEFT":
-                self.game.player_img_current=self.game.goose_left_sprites[0]
+        # self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
+        # self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
+        # self.rect = self.image.get_rect()
+        # self.rect.center = self.pos
+        # if not self.moving and not self.reloading and not self.getTube and not self.stowTube and not self.drinking:
+        #     if self.currentHand=="RIGHT":
+        #         self.game.player_img_current=self.game.goose_right_sprites[0]
+        #     elif self.currentHand=="LEFT":
+        #         self.game.player_img_current=self.game.goose_left_sprites[0]
+
+
+    def rotate(self):
+
+        mouse_pos = pg.mouse.get_pos()
+        # Calculate the vector to the mouse position by subtracting
+        # the self.pos vector from the mouse_pos.
+        rel_x, rel_y = mouse_pos - self.pos
+        # Use math.atan2 to get the angle in radians and convert it to degrees.
+        angle = -math.degrees(math.atan2(rel_y, rel_x))
+        # Rotate the image.
+        self.image = pg.transform.rotozoom(self.game.player_img_current, angle, 1)
+        # Update the rect and keep the center at the old position.
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.rect.centerx = self.pos.x
+        self.rect.centery = self.pos.y
+
+
     def makeMove(self):
         if self.moving ==True:
             self.inDeadBox=False
@@ -564,10 +585,12 @@ class Player(pg.sprite.Sprite):
                     self.actionPoints=0
                 if self.defensePoints>1:
                     self.defensePoints-=.5
-            self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
-            self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
-            self.rect = self.image.get_rect()
-            self.rect.center = self.pos
+
+
+            # self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
+            # self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
+            # self.rect = self.image.get_rect()
+            # self.rect.center = self.pos
             self.pos += self.vel * self.game.dt
             self.x=self.pos[0]
             self.y=self.pos[1]
