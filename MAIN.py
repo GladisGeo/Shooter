@@ -267,37 +267,37 @@ class Game:
         self.all_sprites.update()
         self.camera.update(self.player)
         
-        # # mobs hit player
-        # hits = pg.sprite.spritecollide(self.player, self.items, False)
-        # for hit in hits:
-        #     if hit.type == 'health' and self.player.health < self.player.totalHealth:
-        #         hit.kill()
-        #         self.player.add_health(HEALTH_PACK_AMOUNT) 
-        #     if hit.type == 'playerRespawn':
-        #         if self.respawnOpen:
-        #             self.player.inDeadBox=True
+        # mobs hit player
+        hits = pg.sprite.spritecollide(self.player, self.items, False)
+        for hit in hits:
+            if hit.type == 'health' and self.player.health < self.player.totalHealth:
+                hit.kill()
+                self.player.add_health(HEALTH_PACK_AMOUNT) 
+            if hit.type == 'playerRespawn':
+                if self.respawnOpen:
+                    self.player.inDeadBox=True
 
 
-        # hits = pg.sprite.spritecollide(self.player, self.bullets, False, collide_hit_rect)
-        # for hit in hits:
-        #     if self.player.eliminated:
-        #         self.player.endurancePoints-=10
-        #         if self.player.endurancePoints<0:
-        #             self.player.endurancePoints=0
-        #     self.player.defensePoints -= hit.shooter.accuracy
-        #     self.player.actionPoints-=15
-        #     if self.player.actionPoints <0:
-        #             self.player.actionPoints =0
-        #     if self.player.defensePoints <0:
-        #         self.player.defensePoints=0
-        #         # hit.shooter.target=self.mobRespawn
-        #         MuzzleFlash(self, self.player.pos,"splat")
-        #         choice(self.splatSounds).play(0)
-        #     else:
-        #         pass
-        #         #self.player.dodge()
-        # if hits:
-        #     hits[0].kill()
+        hits = pg.sprite.spritecollide(self.player, self.bullets, False, collide_hit_rect)
+        for hit in hits:
+            if self.player.eliminated:
+                self.player.endurancePoints-=10
+                if self.player.endurancePoints<0:
+                    self.player.endurancePoints=0
+            self.player.defensePoints -= hit.shooter.accuracy
+            self.player.actionPoints-=15
+            if self.player.actionPoints <0:
+                    self.player.actionPoints =0
+            if self.player.defensePoints <0:
+                self.player.defensePoints=0
+                # hit.shooter.target=self.mobRespawn
+                MuzzleFlash(self, self.player.pos,"splat")
+                choice(self.splatSounds).play(0)
+            else:
+                pass
+                #self.player.dodge()
+        if hits:
+            hits[0].kill()
 
         for i in self.mobs:    
             hits = pg.sprite.spritecollide(i, self.items, False)
@@ -322,16 +322,16 @@ class Game:
 
 
 
-       # hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
-        # for hit in hits:
-        #     self.player.health -= MOB_DAMAGE
-        #     hit.vel = vec(0, 0)
-        #     if self.player.health <= 0:
-        #         self.playing = False
-        # if hits:
-        #     self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
+    #    hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
+    #     for hit in hits:
+    #         self.player.health -= MOB_DAMAGE
+    #         hit.vel = vec(0, 0)
+    #         if self.player.health <= 0:
+    #             self.playing = False
+    #     if hits:
+    #         self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
 
-        # bullets hit mobs 
+    #     bullets hit mobs 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))

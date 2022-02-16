@@ -114,14 +114,14 @@ class Player(pg.sprite.Sprite):
         self.endurancePoints=self.endurancePointsTotal
         #Image and position
         self.vel = vec(0, 0)
-        self.pos = vec(y, x)
+        self.pos = vec(x, y)
         self.image = game.player_img_current
         self.rect = self.image.get_rect(center=self.pos)
         #self.rect = self.image.get_rect()
         #self.rect.center=(x,y)
         self.hit_rect = pg.Rect(20, 20, 40,40)
         self.hit_rect.center = self.rect.center
-        self.angle=0
+
         self.rot = 0
         self.rotationSpeed=150
         self.inDeadBoxCounter=1
@@ -354,7 +354,7 @@ class Player(pg.sprite.Sprite):
         if keys[TURNRIGHT] :
             self.rot_speed=-self.rotationSpeed
         if keys[MOVEFORWARD] :
-                self.vel = vec(self.speed-self.speedPenalty, 0).rotate(-self.angle)
+                self.vel = vec(self.speed-self.speedPenalty, 0).rotate(-self.rot)
                 self.moving=True
                 self.stepper()
         if keys[MOVEBACK] :
@@ -532,16 +532,16 @@ class Player(pg.sprite.Sprite):
         self.incrementStats()
 
         if not self.eliminated:
-            self.get_keys()
+            #self.get_keys()
             self.reload()
             self.hydrate()
             self.getHydro()
             self.stowHydro()
-            self.makeMove()
+            #self.makeMove()
             #print (self.getTube)
         else:
-            self.get_keys()
-            self.makeMove()
+            #self.get_keys()
+            #self.makeMove()
             self.respawn()
 
 
