@@ -1,108 +1,51 @@
+# GitHub:
+# https://github.com/Rabbid76/PyGameExamplesAndAnswers/blob/master/documentation/pygame/pygame_sprite_and_sprite_mask.md
+#
+# Stack Overflow:
+# https://stackoverflow.com/questions/64805267/in-the-pygame-module-no-matter-what-i-change-the-coordinates-of-player-to-it-w/64806308#64806308
+
 import pygame
-import math
+import SETTINGS
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.original_image = pygame.image.load('img\Goose\GooseRight0.png')
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center = (x, y))
+        self.velocity = 5
 
-# === CONSTANS === (UPPER_CASE names)
+    def point_at(self, x, y):
+        direction = pygame.math.Vector2(x, y) - self.rect.center
+        angle = direction.angle_to((0, -1))+90
+        print(angle)
+        self.image = pygame.transform.rotozoom(self.original_image, angle,1)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
-BLACK = (  0,   0,   0)
-WHITE = (255, 255, 255)
+    def move(self, x, y):
+        self.rect.move_ip(x * self.velocity, y * self.velocity)
 
-RED   = (255,   0,   0)
-GREEN = (  0, 255,   0)
-BLUE  = (  0,   0, 255)
-
-SCREEN_WIDTH  = 600
-SCREEN_HEIGHT = 400
-
-# === MAIN === (lower_case names)
-
-# --- init ---
 
 pygame.init()
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-screen_rect = screen.get_rect()
-
-# --- objects ---
-
-player = pygame.Rect(screen_rect.centerx, screen_rect.bottom, 0, 0)
-start = pygame.math.Vector2(player.center)
-end = start
-length = 50
-
-SPEED = 5
-
-all_bullets = []
-
-# --- mainloop ---
-
+window = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
-is_running = True
 
+player = Player(*window.get_rect().center)
+all_sprites = pygame.sprite.Group(player)
 
-while is_running:
-
-    # --- events ---
-
+run = True
+while run:
+    clock.tick(60)
     for event in pygame.event.get():
-
-        # --- global events ---
-
         if event.type == pygame.QUIT:
-            is_running = False
+            run = False
 
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                is_running = False
-        
-        elif event.type == pygame.MOUSEMOTION:
-            mouse = pygame.mouse.get_pos()
-            end = start + (mouse - start).normalize() * length
-        
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            
-            distance_x = mouse_x - player.x
-            distance_y = mouse_y - player.y
-            
-            angle = math.atan2(distance_y, distance_x)
-            
-            # speed_x, speed_y can be `float` but I don't convert to `int` to get better position
-            speed_x = SPEED * math.cos(angle)
-            speed_y = SPEED * math.sin(angle)
-            
-            # I copy `player.x, player.y` because I will change these values directly on list
-            all_bullets.append([player.x, player.y, speed_x, speed_y])
-            
-        # --- objects events ---
+    player.point_at(*pygame.mouse.get_pos())
+    keys = pygame.key.get_pressed()
+    player.move(keys[pygame.K_d]-keys[pygame.K_a], keys[pygame.K_s]-keys[pygame.K_w])
 
-            # empty
-
-    # --- updates ---
-
-    # move using speed - I use indexes to change directly on list
-    for item in all_bullets:
-        # speed_x, speed_y can be `float` but I don't convert to `int` to get better position
-        item[0] += item[2]  # pos_x += speed_x
-        item[1] += item[3]  # pos_y -= speed_y
-
-    # --- draws ---
-
-    screen.fill(BLACK)
-
-    pygame.draw.line(screen, RED, start, end)
-
-    for pos_x, pos_y, speed_x, speed_y in all_bullets:
-        # need to convert `float` to `int` because `screen` use only `int` values
-        pos_x = int(pos_x)
-        pos_y = int(pos_y)
-        pygame.draw.line(screen, (0,255,0), (pos_x, pos_y), (pos_x, pos_y))
-        
-    pygame.display.update()
-
-    # --- FPS ---
-
-    clock.tick(25)
-
-# --- the end ---
+    window.fill((255, 255, 255))
+    all_sprites.draw(window)
+    pygame.display.flip()
 
 pygame.quit()
+exit()

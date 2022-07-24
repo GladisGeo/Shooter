@@ -36,6 +36,7 @@ class Player(pg.sprite.Sprite):
         self.defenseRecharge=self.defenseStat/2
         self.dodging=False
         #Movement Stat
+        self.last_rot=0
         self.movementStat=10
         self.totalMovementPoints=self.movementStat*10
         self.movementPoints=self.totalMovementPoints
@@ -48,6 +49,7 @@ class Player(pg.sprite.Sprite):
         self.stepIndex=1
         self.stepRate=8
         self.speedPenalty=0
+        self.rot_speed=0
         self.resting=False
         #Enduranc Stat
         self.enduranceStat=20
@@ -121,7 +123,6 @@ class Player(pg.sprite.Sprite):
         #self.rect.center=(x,y)
         self.hit_rect = pg.Rect(20, 20, 40,40)
         self.hit_rect.center = self.rect.center
-
         self.rot = 0
         self.rotationSpeed=150
         self.inDeadBoxCounter=1
@@ -157,7 +158,6 @@ class Player(pg.sprite.Sprite):
                         self.actionPoints +=10-diff
                     else:
                         self.actionPoints=test
-
         if self.statCounter==61:    
             self.statCounter=1
 
@@ -186,11 +186,8 @@ class Player(pg.sprite.Sprite):
                     i['status']='full'
                     i['count']=i['capacity']
                     i['img']=2
-                #pod={'selected':False,'status':'full','capacity':7,'count':7,'img':0,'offset':podOffset}
                 self.currentPod=self.podPack[0]
                 self.currentPod['selected']=True
-                
-                #self.dodge()
 
     def SwitchHands(self):
         if self.currentHand=="LEFT":
@@ -303,6 +300,7 @@ class Player(pg.sprite.Sprite):
             if self.currentPod['status']!='empty':
                 if self.currentAmmoCount!=self.totalAmmoCount:
                     self.reloading=True
+    
     def changeMode(self):
         if self.fireMode== "semi-auto":
             self.fireMode= "3 round burst"
@@ -310,6 +308,7 @@ class Player(pg.sprite.Sprite):
             self.fireMode= "full-auto"
         elif self.fireMode== "full-auto":
             self.fireMode= "semi-auto"
+    
     def get_keys(self):
         self.rot_speed=0 
         self.vel = vec(0, 0)
@@ -338,9 +337,6 @@ class Player(pg.sprite.Sprite):
             self.setPod(9)  
         if keys[pg.K_s] :
             self.sprinting=True
-
-
-
         if keys[MOVELEFT] :
                 self.vel = vec(self.speed-50-self.speedPenalty, 0).rotate(-self.rot-90)
                 self.moving=True
@@ -351,6 +347,7 @@ class Player(pg.sprite.Sprite):
                 self.stepper()
         if keys[TURNLEFT] :
             self.rot_speed=self.rotationSpeed
+            print(self.rot_speed)
         if keys[TURNRIGHT] :
             self.rot_speed=-self.rotationSpeed
         if keys[MOVEFORWARD] :
@@ -458,7 +455,6 @@ class Player(pg.sprite.Sprite):
                 self.hydroIndex=9
             if self.hydroPercent == 0:
                 self.hydroIndex=10            
- 
         if selector == "defense":
             self.DefensePoints=current
             self.defensePercent=percent
@@ -508,7 +504,6 @@ class Player(pg.sprite.Sprite):
         else:
             self.movementPoints=0
         self.percenter('defense')
-
         while self.dodging==True:
             counter+=1
             if counter % 2 ==0:
@@ -521,7 +516,7 @@ class Player(pg.sprite.Sprite):
                 self.dodging=False
 
     def update(self):
-        self.rotate()
+
         self.percenter('air')
         self.percenter('action')
         self.percenter('ammo')
@@ -532,45 +527,49 @@ class Player(pg.sprite.Sprite):
         self.incrementStats()
 
         if not self.eliminated:
-            #self.get_keys()
+            self.get_keys()
             self.reload()
             self.hydrate()
             self.getHydro()
             self.stowHydro()
-            #self.makeMove()
-            #print (self.getTube)
+            self.makeMove()
         else:
-            #self.get_keys()
-            #self.makeMove()
+            self.get_keys()
+            self.makeMove()
             self.respawn()
+        self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
+        self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        if not self.moving and not self.reloading and not self.getTube and not self.stowTube and not self.drinking:
+            if self.currentHand=="RIGHT":
+                self.game.player_img_current=self.game.goose_right_sprites[0]
+            elif self.currentHand=="LEFT":
+                self.game.player_img_current=self.game.goose_left_sprites[0]
 
 
-        # self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
-        # self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
-        # self.rect = self.image.get_rect()
-        # self.rect.center = self.pos
-        # if not self.moving and not self.reloading and not self.getTube and not self.stowTube and not self.drinking:
-        #     if self.currentHand=="RIGHT":
-        #         self.game.player_img_current=self.game.goose_right_sprites[0]
-        #     elif self.currentHand=="LEFT":
-        #         self.game.player_img_current=self.game.goose_left_sprites[0]
+    # def rotate(self):
+    #     mouse_pos = pg.mouse.get_pos()
 
 
-    def rotate(self):
 
-        mouse_pos = pg.mouse.get_pos()
-        # Calculate the vector to the mouse position by subtracting
-        # the self.pos vector from the mouse_pos.
-        rel_x, rel_y = mouse_pos - self.pos
-        # Use math.atan2 to get the angle in radians and convert it to degrees.
-        angle = -math.degrees(math.atan2(rel_y, rel_x))
-        # Rotate the image.
-        self.image = pg.transform.rotozoom(self.game.player_img_current, angle, 1)
-        # Update the rect and keep the center at the old position.
-        self.rect = self.image.get_rect(center=self.rect.center)
-        self.rect.centerx = self.pos.x
-        self.rect.centery = self.pos.y
 
+    #     rel_y, rel_x =  self.pos - mouse_pos
+    #     # Use math.atan2 to get the angle in radians and convert it to degrees.
+    #     angle = math.degrees(math.atan2(rel_y, rel_x))
+    #     angle=int(angle*180/math.pi)%360
+    #     # rot=self.rot+angle
+    #     # # Rotate the image.
+    #     print(angle)
+    #     # if angle != self.last_rot:
+    #     #     self.rot=rot
+    #     #     print(self.rot)
+    #     self.image = pg.transform.rotozoom(self.game.player_img_current, angle, 1)
+    #     # # Update the rect and keep the center at the old position.
+    #     # self.rect = self.image.get_rect(center=self.rect.center)
+    #     # self.rect.centerx = self.pos.x
+    #     # self.rect.centery = self.pos.y
+    #     # self.last_rot=angle
 
     def makeMove(self):
         if self.moving ==True:
@@ -585,12 +584,10 @@ class Player(pg.sprite.Sprite):
                     self.actionPoints=0
                 if self.defensePoints>1:
                     self.defensePoints-=.5
-
-
-            # self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
-            # self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
-            # self.rect = self.image.get_rect()
-            # self.rect.center = self.pos
+            self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
+            self.image = pg.transform.rotozoom(self.game.player_img_current, self.rot,1)
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos
             self.pos += self.vel * self.game.dt
             self.x=self.pos[0]
             self.y=self.pos[1]
@@ -613,6 +610,7 @@ class Player(pg.sprite.Sprite):
                 if self.endurancePoints<0:
                     self.endurancePoints=0
             self.percenter('movement')
+
 
     def printStats(self,a,b,c,d,e,f):
         surface=self.game.screen
