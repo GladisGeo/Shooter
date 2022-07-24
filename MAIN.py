@@ -15,7 +15,6 @@ from MOB import *
 from PLAYER import *
 from WALL import *
 from ITEM import *
-
 vec = pg.math.Vector2
 
 
@@ -23,7 +22,6 @@ class Game:
     def __init__(self,mainmenu):
         pg.init()
         self.mainmenu=mainmenu
-    
         self.playing = True
         self.running=True
         self.go=True
@@ -116,7 +114,6 @@ class Game:
             self.mob_right_air_reload_sequence.append(pg.image.load(path.join(mob_folder, img)).convert_alpha())
         for img in GOOSE_ELIMINATED_SPRITES:
             self.goose_eliminated_sprites.append(pg.image.load(path.join(goose_folder, img)).convert_alpha())  
-                
         for img in GOOSE_RIGHT_SPRITES:
             self.goose_right_sprites.append(pg.image.load(path.join(goose_folder, img)).convert_alpha())  
         for img in GOOSE_LEFT_SPRITES:
@@ -152,9 +149,6 @@ class Game:
         # for snd in ZOMBIE_HIT_SOUNDS:
         #     self.zombie_hit_sounds.append(pg.mixer.Sound(path.join(sfx_folder, snd)))
     
-    
-    
-    
     def respawnTimer(self):
         if self.seconds != self.lastSecond:
             self.respawnCounter+=1
@@ -177,13 +171,6 @@ class Game:
         # if self.respawnTime == 0:
         #         self.respawnTime = 60
     
-
-
-
-            
-            
-
-
     def new(self):
         counter=0
         # initialize all variables and do all the setup for a new game
@@ -216,32 +203,26 @@ class Game:
                          tile_object.width, tile_object.height,"mobRespawn")
                     self.mobRespawn =Item(self, obj_center, tile_object.name)
                     self.mobRespawn.type="mobRespawn"
-
-
             if tile_object.name == 'PlayerRespawn':
                     Obstacle(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height,"playerRespawn")
                     self.playerRespawn =Item(self, obj_center, tile_object.name)
                     self.playerRespawn.type="playerRespawn"
-
             if tile_object.name == 'stopper':
                 Obstacle(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height,"stopper")
             if tile_object.name == 'player':
                 self.player = Player(self, tile_object.x, tile_object.y)
-
             if tile_object.name == 'mob':
                 self.mob_images.append(self.mob_img)
                 Mob(self, counter,tile_object.x, tile_object.y)
-                
                 counter +=1
             if tile_object.name in ['mobRespawn']:
                     Item(self, obj_center, tile_object.name)   
             if tile_object.name in ['playerRespawn']:
                     Item(self, obj_center, tile_object.name) 
             if tile_object.name in ['health']:
-                Item(self, obj_center, tile_object.name)
-                         
+                Item(self, obj_center, tile_object.name)        
         self.camera = Camera(self.map.width, self.map.height)
 
     def run(self):
@@ -263,10 +244,8 @@ class Game:
 
     def update(self):
         # update portion of the game loop
-
         self.all_sprites.update()
         self.camera.update(self.player)
-        
         # mobs hit player
         hits = pg.sprite.spritecollide(self.player, self.items, False)
         for hit in hits:
@@ -276,8 +255,6 @@ class Game:
             if hit.type == 'playerRespawn':
                 if self.respawnOpen:
                     self.player.inDeadBox=True
-
-
         hits = pg.sprite.spritecollide(self.player, self.bullets, False, collide_hit_rect)
         for hit in hits:
             if self.player.eliminated:
@@ -298,14 +275,12 @@ class Game:
                 #self.player.dodge()
         if hits:
             hits[0].kill()
-
         for i in self.mobs:    
             hits = pg.sprite.spritecollide(i, self.items, False)
             for hit in hits:
                 if hit.type == 'mobRespawn':
                     if self.respawnOpen:
                         i.inDeadBox=True
-
         hits = pg.sprite.groupcollide(self.mobs, self.playerBullets,False,True)
         for hit in hits:
             hit.defense -= BULLET_DAMAGE
@@ -318,10 +293,6 @@ class Game:
                 choice(self.splatSounds).play(0)
             #hit.vel = vec(0, 0)
             hit.dodge()
-
-
-
-
     #    hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
     #     for hit in hits:
     #         self.player.health -= MOB_DAMAGE
@@ -331,7 +302,8 @@ class Game:
     #     if hits:
     #         self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
 
-    #     bullets hit mobs 
+    #     bullets hit mobs
+ 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
@@ -348,7 +320,6 @@ class Game:
                 self.mob_stat_img = pg.image.load(path.join(self.img_folder, STAT_BUBBLE_IMG)).convert_alpha()
                 sprite.statBar.image=self.mob_stat_img
                 sprite.printStats(sprite.currentPod['count'],sprite.airPercent,sprite.cartridges,sprite.defensePercent,sprite.actionPercent,sprite.movementPercent)
-        
         clock_string = self.now.strftime("%H:%M:%S")
         self.clock_surface, textblock = self.gameFont.render( clock_string +' '+self.timeZone , BLACK)
         self.respawn_surface, textblock = self.gameFont.render(str(self.respawnText), BLACK)
@@ -368,17 +339,10 @@ class Game:
             if event.type == pg.KEYUP:
                 if event.key == pg.K_SPACE:
                     self.player.burstCounter=0
-
                 if event.key==HYDRATE:
                     self.player.stowTube=True
-
             if event.type == pygame.VIDEORESIZE:
                  surface = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
-
-            elif event.type == pygame.MOUSEMOTION:
-                self.player.rotate()
-
-
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     sys.exit()
@@ -399,7 +363,4 @@ class Game:
 
 
 
-# g = Game()
-# while g.go == True:
-#     g.new()
-#     g.run()
+
